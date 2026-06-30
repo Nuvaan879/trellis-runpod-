@@ -126,6 +126,22 @@ RUN pip install --no-build-isolation \
 # fails with ModuleNotFoundError. Pinned to the commit TRELLIS expects.
 RUN pip install "git+https://github.com/EasternJournalist/utils3d.git@9a4eb15e4021b67b12c460c7057d642626897ec8"
 
+# ── Pin NumPy to match kaolin's prebuilt ABI (FIX) ───────────────
+# kaolin 0.17.0 is built against NumPy 1.x (its METADATA says
+# `numpy<2.0`). Dependency resolution above can leave an OLDER 1.x
+# numpy whose C-ABI doesn't match kaolin's binary, crashing at import:
+#   ValueError: numpy.dtype size changed, Expected 96 ... got 88
+# Force the newest 1.x (1.26.4) so the ABI matches. Done LAST, after
+# every other pip install, so nothing can downgrade it again.
+# --no-deps so it doesn't disturb already-installed packages.
+RUN pip install --force-reinstall --no-deps numpy==1.26.4
+
+# ── Build-time import smoke test (FIX) ───────────────────────────
+# Reproduce the kaolin import chain on CPU so ANY NumPy/ABI mismatch
+# fails THE BUILD (visible in CI logs) instead of a deployed worker
+# crash-looping. Importing kaolin is CPU-safe (no GPU needed).
+RUN python -c "import numpy; print('numpy', numpy.__version__); import open3d; import utils3d; import kaolin; from kaolin.utils.testing import check_tensor; print('IMPORT SMOKE TEST OK -', 'kaolin', kaolin.__version__)"
+
 # ── TRELLIS is NOT a pip-installable package ──────────────────────
 # FIX: microsoft/TRELLIS has no setup.py / pyproject.toml, so the
 # original guide's `pip install -e .` fails. TRELLIS is used via
