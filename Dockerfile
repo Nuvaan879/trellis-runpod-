@@ -120,8 +120,12 @@ RUN pip install --no-build-isolation \
 RUN pip install --no-build-isolation \
     "git+https://github.com/autonomousvision/mip-splatting.git@main#subdirectory=submodules/diff-gaussian-rasterization"
 
-# ── Install TRELLIS itself as a Python package ────────────────────
-RUN pip install -e .
+# ── TRELLIS is NOT a pip-installable package ──────────────────────
+# FIX: microsoft/TRELLIS has no setup.py / pyproject.toml, so the
+# original guide's `pip install -e .` fails. TRELLIS is used via
+# sys.path instead — inference.py already does
+# sys.path.insert(0, '/workspace/TRELLIS'). Nothing to install here.
+# (All TRELLIS dependencies were already pip-installed above.)
 
 # ── Pre-download rembg background-removal model (FIX) ─────────────
 # preprocess_image=True uses rembg/u2net, which otherwise downloads
