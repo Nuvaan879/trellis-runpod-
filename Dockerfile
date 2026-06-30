@@ -72,6 +72,7 @@ RUN pip install \
     rembg \
     onnxruntime \
     trimesh \
+    open3d \
     xatlas \
     pyvista \
     pymeshfix \
@@ -119,6 +120,11 @@ RUN pip install --no-build-isolation \
 # Compiles from source. Takes 5–10 min.
 RUN pip install --no-build-isolation \
     "git+https://github.com/autonomousvision/mip-splatting.git@main#subdirectory=submodules/diff-gaussian-rasterization"
+
+# ── utils3d: TRELLIS imports this at startup (FIX) ────────────────
+# The original guide omits it; without it `import trellis.pipelines`
+# fails with ModuleNotFoundError. Pinned to the commit TRELLIS expects.
+RUN pip install "git+https://github.com/EasternJournalist/utils3d.git@9a4eb15e4021b67b12c460c7057d642626897ec8"
 
 # ── TRELLIS is NOT a pip-installable package ──────────────────────
 # FIX: microsoft/TRELLIS has no setup.py / pyproject.toml, so the
