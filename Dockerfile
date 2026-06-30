@@ -102,7 +102,9 @@ WORKDIR /workspace/TRELLIS
 RUN pip install spconv-cu118
 
 # ── nvdiffrast: differentiable rasterization ─────────────────────
-RUN pip install git+https://github.com/NVlabs/nvdiffrast.git
+# FIX: nvdiffrast's setup.py refuses to build under pip build isolation
+# (it can't see the installed torch). --no-build-isolation is required.
+RUN pip install --no-build-isolation git+https://github.com/NVlabs/nvdiffrast.git
 
 # ── NVIDIA Kaolin: 3D deep learning library ──────────────────────
 RUN pip install kaolin==0.17.0 \
